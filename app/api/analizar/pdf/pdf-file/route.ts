@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { registrarAccion } from "@/lib/auditoria";
 import { crearNotificacion } from "@/lib/notifications";
 import pdfParse from "pdf-parse";
-import { llamarClaude } from "../_utils";
+import { llamarClaude } from "../../_utils";
 
 export async function POST(req: Request) {
   const form = await req.formData();
