@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { detectarIdioma, llamarClaude } from '../../_utils';
+import { detectarIdioma, llamarClaude } from './_utils';
 
 export async function POST(req: Request) {
   const { texto } = await req.json();
