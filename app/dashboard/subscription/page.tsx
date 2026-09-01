@@ -36,14 +36,14 @@ export default function SubscriptionPage() {
    // window.location.href = url;
   }
 
-  async function openPortal() {
+//  async function openPortal() {
   //  const res = await fetch("/api/stripe/customer-portal", {
-      method: "POST",
-      body: JSON.stringify({ customer_id: customerId }),
-    });
+ //     method: "POST",
+ //     body: JSON.stringify({ customer_id: customerId }),
+ //   });
 
-    const { url } = await res.json();
-    window.location.href = url;
+  //  const { url } = await res.json();
+  //  window.location.href = url;
   }
 
   useEffect(() => {

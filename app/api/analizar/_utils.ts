@@ -1,3 +1,3 @@
-export const parseText = (text: string) => {
+export function parseText(text: string) {
   return text;
-};
+}
