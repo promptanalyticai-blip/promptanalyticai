@@ -28,12 +28,12 @@ export default function SubscriptionPage() {
     const { data } = await supabase.auth.getUser();
 
   //  const res = await fetch("/api/stripe/create-checkout", {
-      method: "POST",
-      body: JSON.stringify({ user_id: data.user.id }),
-    });
+  //    method: "POST",
+  //    body: JSON.stringify({ user_id: data.user.id }),
+  //  });
 
-    const { url } = await res.json();
-    window.location.href = url;
+  //  const { url } = await res.json();
+   // window.location.href = url;
   }
 
   async function openPortal() {
