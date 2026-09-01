@@ -27,7 +27,7 @@ export default function SubscriptionPage() {
   async function subscribe() {
     const { data } = await supabase.auth.getUser();
 
-    const res = await fetch("/api/stripe/create-checkout", {
+  //  const res = await fetch("/api/stripe/create-checkout", {
       method: "POST",
       body: JSON.stringify({ user_id: data.user.id }),
     });
@@ -37,7 +37,7 @@ export default function SubscriptionPage() {
   }
 
   async function openPortal() {
-    const res = await fetch("/api/stripe/customer-portal", {
+  //  const res = await fetch("/api/stripe/customer-portal", {
       method: "POST",
       body: JSON.stringify({ customer_id: customerId }),
     });

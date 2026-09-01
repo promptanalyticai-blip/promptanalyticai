@@ -2,7 +2,7 @@
 
 export default function PagosPage() {
   async function suscribirse() {
-    const res = await fetch("/api/stripe/checkout", { method: "POST" });
+ //   const res = await fetch("/api/stripe/checkout", { method: "POST" });
     const data = await res.json();
     window.location.href = data.url;
   }
