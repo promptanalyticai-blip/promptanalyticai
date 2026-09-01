@@ -1,54 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SubscriptionPage() {
-  const [sub, setSub] = useState<any>(null);
-  const [customerId, setCustomerId] = useState<string | null>(null);
-
-  async function load() {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) {
-      window.location.href = "/auth/login";
-      return;
-    }
-
-    const { data: subs } = await supabase
-      .from("subscriptions")
-      .select("*")
-      .eq("user_id", data.user.id)
-      .single();
-
-    setSub(subs || null);
-   // setCustomerId(subs?.stripe_customer_id || null);
-  }
-
-  async function subscribe() {
-    const { data } = await supabase.auth.getUser();
-
-  //  const res = await fetch("/api/stripe/create-checkout", {
-  //    method: "POST",
-  //    body: JSON.stringify({ user_id: data.user.id }),
-  //  });
-
-  //  const { url } = await res.json();
-   // window.location.href = url;
-  }
-
-//  async function openPortal() {
-  //  const res = await fetch("/api/stripe/customer-portal", {
- //     method: "POST",
- //     body: JSON.stringify({ customer_id: customerId }),
- //   });
-
-  //  const { url } = await res.json();
-  //  window.location.href = url;
-  }
+  const supabase = createClient();
+  const [sub, setSub] = useState(null);
+  const [customerId, setCustomerId] = useState(null);
 
   useEffect(() => {
+    async function load() {
+      const { data } = await supabase.auth.getUser();
+      const user_id = data?.user?.id;
+
+      const res = await fetch(`/api/subscriptions/${user_id}`);
+      const subscription = await res.json();
+
+      setSub(subscription);
+      setCustomerId(subscription?.stripe_customer_id || null);
+    }
+
     load();
   }, []);
+
+  async function subscribe() {
+    // const res = await fetch("/api/stripe/create-checkout", {
+    //   method: "POST",
+    //   body: JSON.stringify({ user_id: customerId }),
+    // });
+
+    // const { url } = await res.json();
+    // window.location.href = url;
+  }
+
+  async function openPortal() {
+    // const res = await fetch("/api/stripe/customer-portal", {
+    //   method: "POST",
+    //   body: JSON.stringify({ customer_id: customerId }),
+    // });
+
+    // const { url } = await res.json();
+    // window.location.href = url;
+  }
 
   return (
     <div className="fade-in">
@@ -65,10 +58,13 @@ export default function SubscriptionPage() {
 
       {sub && (
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow max-w-lg">
-          <p className="mb-2">Estado: <strong>{sub.status}</strong></p>
+          <p className="mb-2">
+            Estado: <strong>{sub.status}</strong>
+          </p>
           <p className="mb-2">Plan: {sub.plan_id}</p>
           <p className="mb-4">
-            Renovación: {new Date(sub.current_period_end).toLocaleDateString()}
+            Renovación:{" "}
+            {new Date(sub.current_period_end).toLocaleDateString()}
           </p>
 
           <button
