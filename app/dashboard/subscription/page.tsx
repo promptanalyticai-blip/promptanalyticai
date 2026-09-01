@@ -21,7 +21,7 @@ export default function SubscriptionPage() {
       .single();
 
     setSub(subs || null);
-    setCustomerId(subs?.stripe_customer_id || null);
+   // setCustomerId(subs?.stripe_customer_id || null);
   }
 
   async function subscribe() {
