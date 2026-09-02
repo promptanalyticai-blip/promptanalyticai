@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     // Cargar historial del chat
     const { data: historial } = await cargarMensajes(chat_id);
 
-    // FIX: historial puede ser null → usamos []
+    // FIX DEFINITIVO: historial puede ser null → usamos []
     const messages = (historial ?? []).map((m: any) => ({
       role: m.rol,
       content: m.contenido,
