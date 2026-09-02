@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: false,
+  // configuración válida aquí
 };
 
 module.exports = nextConfig;
