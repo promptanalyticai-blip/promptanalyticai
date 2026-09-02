@@ -1,14 +1,13 @@
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 export async function generarRespuestaIA(messages: any[]) {
-  const completion = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
+  const prompt = messages.map(m => `${m.role}: ${m.content}`).join("\n");
+
+  const { text } = await generateText({
+    model: openai("gpt-4o-mini"),
+    prompt,
   });
 
-  return completion.choices[0].message.content;
+  return text;
 }
