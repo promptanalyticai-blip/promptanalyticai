@@ -1,36 +1,48 @@
 import { NextResponse } from "next/server";
-import { agregarMensaje, cargarMensajes } from "@/lib/chat";
+import { cargarMensajes } from "@/lib/chat/cargarMensajes";
+import { generarRespuestaIA } from "@/lib/chat/generarRespuestaIA";
 
 export async function POST(req: Request) {
-  const { chat_id, mensaje } = await req.json();
+  try {
+    const body = await req.json();
+    const { chat_id, mensaje } = body;
 
-  await agregarMensaje(chat_id, "user", mensaje);
+    if (!chat_id || !mensaje) {
+      return NextResponse.json(
+        { ok: false, error: "chat_id y mensaje son requeridos" },
+        { status: 400 }
+      );
+    }
 
-  const { data: historial } = await cargarMensajes(chat_id);
+    // Cargar historial del chat
+    const { data: historial } = await cargarMensajes(chat_id);
 
-  const messages = historial.map((m: any) => ({
-    role: m.rol,
-    content: m.contenido,
-  }));
+    // FIX: historial puede ser null → usamos []
+    const messages = (historial ?? []).map((m: any) => ({
+      role: m.rol,
+      content: m.contenido,
+    }));
 
-  messages.push({ role: "user", content: mensaje });
+    // Agregar el mensaje del usuario
+    messages.push({
+      role: "user",
+      content: mensaje,
+    });
 
-  const completion = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": process.env.ANTHROPIC_API_KEY!,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-3-sonnet-20240229",
-      max_tokens: 800,
-      messages,
-    }),
-  }).then((r) => r.json());
+    // Generar respuesta con IA
+    const respuestaIA = await generarRespuestaIA(messages);
 
-  const respuesta = completion.content[0].text;
-
-  await agregarMensaje(chat_id, "assistant", respuesta);
-
-  return NextResponse.json({ respuesta });
+    return NextResponse.json({
+      ok: true,
+      chat_id,
+      mensaje_usuario: mensaje,
+      respuesta_ia: respuestaIA,
+    });
+  } catch (error) {
+    console.error("Error en /api/chat:", error);
+    return NextResponse.json(
+      { ok: false, error: "Error procesando la solicitud" },
+      { status: 500 }
+    );
+  }
 }
