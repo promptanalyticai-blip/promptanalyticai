@@ -14,4 +14,3 @@ export async function cargarMensajes(chat_id: string) {
 
   return { data };
 }
-echo "// force build" >> lib/chat/cargarMensajes.ts
