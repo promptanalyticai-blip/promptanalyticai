@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const doc = new PDFDocument();
   const chunks: Uint8Array[] = [];
 
-  doc.on("data", (chunk) => chunks.push(chunk));
+  doc.on("data", (chunk: Uint8Array) => chunks.push(chunk));
   doc.on("end", () => {});
 
   doc.fontSize(20).text(titulo);
