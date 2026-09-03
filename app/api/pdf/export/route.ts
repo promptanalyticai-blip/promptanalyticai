@@ -17,10 +17,9 @@ export async function POST(req: Request) {
 
   await registrarAccion(workspaceId!, auth.user.id, "exportar pdf", titulo);
 
-  return new NextResponse(pdfBytes, {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${titulo}.pdf"`,
-    },
-  });
-}
+  return new NextResponse(pdfBytes.buffer, {
+  headers: {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="${titulo}.pdf"`,
+  },
+});
