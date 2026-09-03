@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { cargarMensajes } from "@/lib/chat/cargarMensajes";
 import { generarRespuestaIA } from "@/lib/chat/generarRespuestaIA";
 
+type MensajeHistorial = {
+  rol: "user" | "assistant";
+  contenido: string;
+};
+
+type MensajeIA = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json() as { chat_id: string; mensaje: string };
     const { chat_id, mensaje } = body;
 
     if (!chat_id || !mensaje) {
@@ -17,8 +27,8 @@ export async function POST(req: Request) {
     // Cargar historial del chat
     const { data: historial } = await cargarMensajes(chat_id);
 
-    // FIX: historial puede ser null → usamos []
-    const messages = (historial ?? []).map((m: any) => ({
+    // Convertir historial → mensajes IA
+    const messages: MensajeIA[] = (historial ?? []).map((m: MensajeHistorial) => ({
       role: m.rol,
       content: m.contenido,
     }));
