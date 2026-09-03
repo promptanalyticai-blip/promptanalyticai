@@ -1,25 +1,31 @@
 import { NextResponse } from "next/server";
-import { generarPDF } from "@/lib/pdf";
-import { supabase } from "@/lib/supabaseClient";
+import PDFDocument from "pdfkit";
 import { registrarAccion } from "@/lib/auditoria";
 
 export async function POST(req: Request) {
-  const { titulo, contenido } = await req.json();
+  const { titulo, contenido, workspaceId, auth } = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
+  // Crear PDF
+  const doc = new PDFDocument();
+  const chunks: Uint8Array[] = [];
 
-  const workspaceId = localStorage.getItem("workspace_id");
+  doc.on("data", (chunk) => chunks.push(chunk));
+  doc.on("end", () => {});
 
-  const pdfBytes = await generarPDF(titulo, contenido, workspaceId || "Workspace");
+  doc.fontSize(20).text(titulo);
+  doc.moveDown();
+  doc.fontSize(12).text(contenido);
+
+  doc.end();
+
+  const pdfBytes = Buffer.concat(chunks);
 
   await registrarAccion(workspaceId!, auth.user.id, "exportar pdf", titulo);
 
   return new NextResponse(pdfBytes.buffer, {
-  headers: {
-    "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="${titulo}.pdf"`,
-  },
-});
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${titulo}.pdf"`,
+    },
+  });
+}
