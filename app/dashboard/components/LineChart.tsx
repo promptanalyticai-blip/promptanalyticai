@@ -1,37 +1,41 @@
 "use client";
 
-import ReactECharts from "echarts-for-react";
+import { ReactNode } from "react";
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
-export default function LineChart({ analyticsByDay, usersByDay }) {
-  const days = analyticsByDay.map((d) => d.day);
+type AnalyticsItem = {
+  fecha: string;
+  valor: number;
+};
 
-  const analysisCounts = analyticsByDay.map((d) => d.count);
-  const userCounts = usersByDay.map((d) => d.count);
+export default function LineChart({
+  title,
+  data,
+}: {
+  title: string;
+  data: AnalyticsItem[];
+}) {
+  return (
+    <div className="p-4 border rounded-lg bg-white shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
 
-  const option = {
-    xAxis: {
-      type: "category",
-      data: days,
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        name: "Análisis por día",
-        type: "line",
-        data: analysisCounts,
-      },
-      {
-        name: "Usuarios por día",
-        type: "line",
-        data: userCounts,
-      },
-    ],
-  };
-
-  return <ReactECharts option={option} />;
+      <ResponsiveContainer width="100%" height={300}>
+        <RechartsLineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="fecha" />
+          <YAxis />
+          <Tooltip />
+          <Line type="monotone" dataKey="valor" stroke="#2563eb" strokeWidth={2} />
+        </RechartsLineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
-<ClientWrapper>
-  <LineChart analyticsByDay={analyticsByDay} usersByDay={usersByDay} />
-</ClientWrapper>
