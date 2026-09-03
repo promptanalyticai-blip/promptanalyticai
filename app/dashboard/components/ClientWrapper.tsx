@@ -1,5 +1,7 @@
 "use client";
 
-export default function ClientWrapper({ children }) {
+import { ReactNode } from "react";
+
+export default function ClientWrapper({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
