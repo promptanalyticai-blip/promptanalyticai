@@ -1,80 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+
+type Subscription = {
+  id: string;
+  status: string;
+  plan_id: string;
+  created_at: string;
+};
 
 export default function SubscriptionPage() {
-  const supabase = createClient();
-  const [sub, setSub] = useState(null);
-  const [customerId, setCustomerId] = useState(null);
+  const [subs, setSubs] = useState<Subscription[]>([]);
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.auth.getUser();
-      const user_id = data?.user?.id;
-
-      const res = await fetch(`/api/subscriptions/${user_id}`);
-      const subscription = await res.json();
-
-      setSub(subscription);
-      setCustomerId(subscription?.stripe_customer_id || null);
+      const res = await fetch("/api/subscriptions");
+      const data = await res.json();
+      setSubs(data.subscriptions ?? []);
     }
 
     load();
   }, []);
 
-  async function subscribe() {
-    // const res = await fetch("/api/stripe/create-checkout", {
-    //   method: "POST",
-    //   body: JSON.stringify({ user_id: customerId }),
-    // });
-
-    // const { url } = await res.json();
-    // window.location.href = url;
-  }
-
-  async function openPortal() {
-    // const res = await fetch("/api/stripe/customer-portal", {
-    //   method: "POST",
-    //   body: JSON.stringify({ customer_id: customerId }),
-    // });
-
-    // const { url } = await res.json();
-    // window.location.href = url;
-  }
-
   return (
-    <div className="fade-in">
-      <h1 className="text-3xl font-bold mb-6">Suscripción</h1>
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">Suscripciones</h1>
 
-      {!sub && (
-        <button
-          onClick={subscribe}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+      {subs.length === 0 && <p>No hay suscripciones activas.</p>}
+
+      {subs.map((sub) => (
+        <div
+          key={sub.id}
+          className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow max-w-lg mb-4"
         >
-          Suscribirme al plan Pro
-        </button>
-      )}
-
-      {sub && (
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow max-w-lg">
           <p className="mb-2">
             Estado: <strong>{sub.status}</strong>
           </p>
           <p className="mb-2">Plan: {sub.plan_id}</p>
-          <p className="mb-4">
-            Renovación:{" "}
-            {new Date(sub.current_period_end).toLocaleDateString()}
-          </p>
-
-          <button
-            onClick={openPortal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Administrar suscripción
-          </button>
+          <p className="mb-4">Creado: {sub.created_at}</p>
         </div>
-      )}
+      ))}
     </div>
   );
 }
