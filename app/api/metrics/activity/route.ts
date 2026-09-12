@@ -1,7 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { logs } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const supabase = supabaseServer();
@@ -18,14 +15,22 @@ export async function GET(req: Request) {
     return Response.json({ error: "Missing workspaceId" }, { status: 400 });
   }
 
-  const result = await db
-    .select({
-      day: sql`DATE(created_at)`,
-      count: sql`COUNT(*)`,
-    })
-    .from(logs)
-    .where(eq(logs.workspaceId, workspaceId))
-    .groupBy(sql`DATE(created_at)`);
+  const { data, error } = await supabase
+    .from("logs")
+    .select("created_at")
+    .eq("workspaceId", workspaceId);
 
-  return Response.json(result);
+  if (error) return Response.json([], { status: 500 });
+
+  // Agrupar por día
+  const grouped = Object.values(
+    data.reduce((acc: any, log: any) => {
+      const day = log.created_at.split("T")[0];
+      acc[day] = acc[day] || { day, count: 0 };
+      acc[day].count++;
+      return acc;
+    }, {})
+  );
+
+  return Response.json(grouped);
 }

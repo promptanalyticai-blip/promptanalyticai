@@ -1,6 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { logs } from "@/lib/db/schema";
 
 export async function POST(req: Request) {
   const supabase = supabaseServer();
@@ -16,7 +14,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  await db.insert(logs).values({
+  await supabase.from("logs").insert({
     id: crypto.randomUUID(),
     userId: userData.user.id,
     workspaceId,
@@ -25,4 +23,3 @@ export async function POST(req: Request) {
 
   return Response.json({ success: true });
 }
-

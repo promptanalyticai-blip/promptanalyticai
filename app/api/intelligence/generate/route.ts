@@ -1,7 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { auditLogs } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { anthropic } from "@/lib/anthropic";
 
 export async function POST(req: Request) {
@@ -17,10 +14,10 @@ export async function POST(req: Request) {
     return Response.json({ error: "Missing workspaceId" }, { status: 400 });
   }
 
-  const logs = await db
-    .select()
-    .from(auditLogs)
-    .where(eq(auditLogs.workspaceId, workspaceId));
+  const { data: logs } = await supabase
+    .from("auditLogs")
+    .select("*")
+    .eq("workspaceId", workspaceId);
 
   const prompt = `
 Analiza la siguiente actividad del workspace y genera:
@@ -30,7 +27,7 @@ Analiza la siguiente actividad del workspace y genera:
 3. Sugerencias de automations
 4. Sugerencias de tareas
 5. Sugerencias de reportes
-6. Sugerencias de análisis
+6. Sugerencias de analisis
 7. Patrones detectados
 8. Riesgos o problemas
 9. Oportunidades de mejora

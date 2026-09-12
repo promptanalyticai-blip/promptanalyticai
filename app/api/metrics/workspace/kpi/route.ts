@@ -1,7 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { prompts, analyses, reports, files, logs } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const supabase = supabaseServer();
@@ -19,19 +16,18 @@ export async function GET(req: Request) {
   }
 
   const [p, a, r, f, l] = await Promise.all([
-    db.select().from(prompts).where(eq(prompts.workspaceId, workspaceId)),
-    db.select().from(analyses).where(eq(analyses.workspaceId, workspaceId)),
-    db.select().from(reports).where(eq(reports.workspaceId, workspaceId)),
-    db.select().from(files).where(eq(files.workspaceId, workspaceId)),
-    db.select().from(logs).where(eq(logs.workspaceId, workspaceId)),
+    supabase.from("prompts").select("*").eq("workspaceId", workspaceId),
+    supabase.from("analyses").select("*").eq("workspaceId", workspaceId),
+    supabase.from("reports").select("*").eq("workspaceId", workspaceId),
+    supabase.from("files").select("*").eq("workspaceId", workspaceId),
+    supabase.from("logs").select("*").eq("workspaceId", workspaceId),
   ]);
 
   return Response.json({
-    prompts: p.length,
-    analyses: a.length,
-    reports: r.length,
-    files: f.length,
-    logs: l.length,
+    prompts: p.data?.length || 0,
+    analyses: a.data?.length || 0,
+    reports: r.data?.length || 0,
+    files: f.data?.length || 0,
+    logs: l.data?.length || 0,
   });
 }
-

@@ -1,7 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { auditLogs } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const supabase = supabaseServer();
@@ -18,10 +15,12 @@ export async function GET(req: Request) {
     return Response.json([], { status: 400 });
   }
 
-  const result = await db
-    .select()
-    .from(auditLogs)
-    .where(eq(auditLogs.workspaceId, workspaceId));
+  const { data, error } = await supabase
+    .from("auditLogs")
+    .select("*")
+    .eq("workspaceId", workspaceId);
 
-  return Response.json(result);
+  if (error) return Response.json([], { status: 500 });
+
+  return Response.json(data);
 }
