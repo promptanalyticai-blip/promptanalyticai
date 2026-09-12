@@ -1,13 +1,12 @@
-import { supabase } from "./supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function guardarAnalisisDB(texto: string, resultado: string, industria: string) {
-  return await supabase.from("analisis").insert([{ texto, resultado, industria }]);
-}
+export async function getHistorial() {
+  const { data, error } = await supabaseServer
+    .from("historial")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-export async function cargarHistorialDB() {
-  return await supabase.from("analisis").select("*").order("id", { ascending: false });
-}
+  if (error) throw new Error(error.message);
 
-export async function marcarFavoritoDB(id: number) {
-  return await supabase.from("analisis").update({ favorito: true }).eq("id", id);
+  return data;
 }
