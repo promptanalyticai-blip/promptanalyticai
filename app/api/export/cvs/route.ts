@@ -43,8 +43,8 @@ export async function GET(req: Request) {
       });
     }
 
-    // STRUCTURED MODE (INTELLIGENT)
-    const sections = [];
+    // STRUCTURED MODE
+    const sections: { section: string; content: string }[] = [];
 
     // 1. Detect Markdown headers
     const headerRegex = /^#{1,6}\s+(.*)$/gm;
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
         sections.push({ section: sectionTitle, content: sectionContent });
       }
     } else {
-      // 2. Detect keyword-based sections
+      // 2. Keyword-based sections
       const keywords = [
         "Introducción",
         "Análisis",
@@ -73,4 +73,50 @@ export async function GET(req: Request) {
         "Recomendaciones",
       ];
 
-      let foundKeyword
+      let foundKeyword = false;
+
+      for (const keyword of keywords) {
+        if (content.includes(keyword)) {
+          foundKeyword = true;
+          const parts = content.split(keyword).slice(1);
+
+          parts.forEach((p, idx) => {
+            sections.push({
+              section: `${keyword} ${idx + 1}`,
+              content: p.trim(),
+            });
+          });
+        }
+      }
+
+      // 3. Split by blank lines
+      if (!foundKeyword) {
+        const blocks = content.split(/\n\s*\n/);
+
+        blocks.forEach((block, idx) => {
+          sections.push({
+            section: `Bloque ${idx + 1}`,
+            content: block.trim(),
+          });
+        });
+      }
+    }
+
+    // Build CSV
+    let csv = "section,content\n";
+    for (const s of sections) {
+      csv += `"${s.section.replace(/"/g, '""')}","${s.content.replace(/"/g, '""')}"\n`;
+    }
+
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv",
+        "Content-Disposition": `attachment; filename="${title}_structured.csv"`,
+      },
+    });
+
+  } catch (error) {
+    console.error("CSV EXPORT ERROR:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

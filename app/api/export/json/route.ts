@@ -33,22 +33,19 @@ export async function GET(req: Request) {
 
     // SIMPLE MODE
     if (mode === "simple") {
-      const json = {
-        title,
-        content,
-      };
-
-      return NextResponse.json(json, {
-        headers: {
-          "Content-Disposition": `attachment; filename="${title}.json"`,
-        },
-      });
+      return NextResponse.json(
+        { title, content },
+        {
+          headers: {
+            "Content-Disposition": `attachment; filename="${title}.json"`,
+          },
+        }
+      );
     }
 
-    // STRUCTURED MODE (INTELLIGENT)
-    const sections = [];
+    // STRUCTURED MODE
+    const sections: { section: string; content: string }[] = [];
 
-    // 1. Detect Markdown headers
     const headerRegex = /^#{1,6}\s+(.*)$/gm;
     const markdownMatches = [...content.matchAll(headerRegex)];
 
@@ -65,7 +62,6 @@ export async function GET(req: Request) {
         sections.push({ section: sectionTitle, content: sectionContent });
       }
     } else {
-      // 2. Detect keyword-based sections
       const keywords = [
         "Introducción",
         "Análisis",
@@ -91,7 +87,6 @@ export async function GET(req: Request) {
         }
       }
 
-      // 3. If no keywords found → split by blank lines
       if (!foundKeyword) {
         const blocks = content.split(/\n\s*\n/);
 
@@ -104,17 +99,14 @@ export async function GET(req: Request) {
       }
     }
 
-    const json = {
-      title,
-      sections,
-    };
-
-    return NextResponse.json(json, {
-      headers: {
-        "Content-Disposition": `attachment; filename="${title}_structured.json"`,
-      },
-    });
-
+    return NextResponse.json(
+      { title, sections },
+      {
+        headers: {
+          "Content-Disposition": `attachment; filename="${title}_structured.json"`,
+        },
+      }
+    );
   } catch (error) {
     console.error("JSON EXPORT ERROR:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
