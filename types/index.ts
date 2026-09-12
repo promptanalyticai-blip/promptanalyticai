@@ -1,0 +1,7 @@
+export type AuditAction =
+  | "PROMPT_CREATED"
+  | "PROMPT_UPDATED"
+  | "PROMPT_DELETED"
+  | "ANALYSIS_RUN"
+  | "REPORT_EXPORTED"
+  | "AUTOMATION_TRIGGERED";
