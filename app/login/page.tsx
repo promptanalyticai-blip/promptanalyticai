@@ -1,51 +1,58 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
-import React from "react";
+import { useState } from "react";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function LoginPage() {
-  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState("");
 
-    const email = (e.currentTarget as any).email.value;
-    const password = (e.currentTarget as any).password.value;
+  const handleLogin = async () => {
+    setStatus("Procesando...");
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseBrowser.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (!error) {
-      window.location.href = "/dashboard";
+    if (error) {
+      setStatus("Error: " + error.message);
+      return;
     }
-  }
+
+    setStatus("Inicio de sesión exitoso.");
+    window.location.href = "/dashboard";
+  };
 
   return (
-    <form onSubmit={handleLogin} className="p-6 space-y-4">
-      <h1 className="text-xl font-semibold">Login</h1>
+    <div className="flex flex-col gap-4 p-6 max-w-md mx-auto">
+      <h1 className="text-xl font-bold">Iniciar sesión</h1>
 
       <input
         type="email"
-        name="email"
-        placeholder="Email"
-        required
-        className="p-2 rounded bg-slate-800 text-white"
+        placeholder="Correo"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="border p-2 rounded"
       />
 
       <input
         type="password"
-        name="password"
-        placeholder="Password"
-        required
-        className="p-2 rounded bg-slate-800 text-white"
+        placeholder="Contraseña"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="border p-2 rounded"
       />
 
       <button
-        type="submit"
-        className="px-4 py-2 bg-indigo-600 rounded text-white"
+        onClick={handleLogin}
+        className="bg-blue-600 text-white p-2 rounded"
       >
         Entrar
       </button>
-    </form>
+
+      {status && <p>{status}</p>}
+    </div>
   );
 }
