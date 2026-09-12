@@ -4,28 +4,20 @@
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
-export default function ReportsPage() {
-  const [reports, setReports] = useState([]);
+export default function DashboardReportsPage() {
+  const [reports, setReports] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadReports = async () => {
-      const { data, error } = await supabaseBrowser
-        .from("reports")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error) {
-        setReports(data);
-      }
+    const load = async () => {
+      const { data } = await supabaseBrowser.from("reports").select("*");
+      setReports(data || []);
     };
-
-    loadReports();
+    load();
   }, []);
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold">Reports</h1>
-
+      <h1 className="text-xl font-bold">Dashboard Reports</h1>
       <ul className="mt-4">
         {reports.map((r) => (
           <li key={r.id} className="border p-2 rounded mb-2">

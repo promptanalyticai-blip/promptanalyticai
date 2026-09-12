@@ -10,39 +10,35 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setStatus("Procesando...");
-
-    const { data, error } = await supabaseBrowser.auth.signInWithPassword({
+    const { error } = await supabaseBrowser.auth.signInWithPassword({
       email,
       password,
     });
-
     if (error) {
       setStatus("Error: " + error.message);
       return;
     }
-
-    setStatus("Inicio de sesión exitoso.");
     window.location.href = "/dashboard";
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold">Iniciar sesión</h1>
+    <div className="p-6 max-w-md mx-auto flex flex-col gap-4">
+      <h1 className="text-xl font-bold">Login</h1>
 
       <input
         type="email"
+        className="border p-2 rounded"
         placeholder="Correo"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 rounded"
       />
 
       <input
         type="password"
+        className="border p-2 rounded"
         placeholder="Contraseña"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 rounded"
       />
 
       <button

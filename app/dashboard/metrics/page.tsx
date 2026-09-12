@@ -1,18 +1,24 @@
 // app/dashboard/metrics/page.tsx
 "use client";
 
-import Header from "../components/Header";
-import { supabase } from "@/lib/supabaseClient";
+import { useEffect, useState } from "react";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function MetricsPage() {
-  async function loadMetrics() {
-    const { data } = await supabase.from("metrics").select("*");
-    return data;
-  }
+  const [metrics, setMetrics] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabaseBrowser.from("metrics").select("*");
+      setMetrics(data || []);
+    };
+    load();
+  }, []);
 
   return (
     <div className="p-6">
-      <Header title="Metrics" subtitle="Estadísticas del sistema" />
+      <h1 className="text-xl font-bold">Metrics</h1>
+      <pre className="mt-4">{JSON.stringify(metrics, null, 2)}</pre>
     </div>
   );
 }

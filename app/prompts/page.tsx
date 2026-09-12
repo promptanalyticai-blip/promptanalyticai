@@ -5,27 +5,19 @@ import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function PromptsPage() {
-  const [prompts, setPrompts] = useState([]);
+  const [prompts, setPrompts] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadPrompts = async () => {
-      const { data, error } = await supabaseBrowser
-        .from("prompts")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error) {
-        setPrompts(data);
-      }
+    const load = async () => {
+      const { data } = await supabaseBrowser.from("prompts").select("*");
+      setPrompts(data || []);
     };
-
-    loadPrompts();
+    load();
   }, []);
 
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold">Prompts</h1>
-
       <ul className="mt-4">
         {prompts.map((p) => (
           <li key={p.id} className="border p-2 rounded mb-2">
