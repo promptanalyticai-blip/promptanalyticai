@@ -1,16 +1,13 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
+  const supabase = supabaseServer();
   const body = await req.json();
 
-  const { error } = await supabaseServer
+  const { error } = await supabase
     .from("sessions")
     .delete()
     .eq("id", body.session_id);
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ success: true });
+  return Response.json({ success: !error, error });
 }

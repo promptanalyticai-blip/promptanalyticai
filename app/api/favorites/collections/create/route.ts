@@ -1,20 +1,12 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const body = await req.json();
+export async function GET() {
+  const supabase = supabaseServer();
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("favorite_collections")
-    .insert({
-      name: body.name,
-      user_id: body.user_id,
-    })
     .select("*")
-    .single();
+    .order("created_at", { ascending: false });
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }

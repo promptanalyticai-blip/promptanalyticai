@@ -1,18 +1,15 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
+  const supabase = supabaseServer();
   const { searchParams } = new URL(req.url);
-  const itemId = searchParams.get("item_id");
+  const item_id = searchParams.get("item_id");
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("comments")
     .select("*")
-    .eq("item_id", itemId)
-    .order("created_at", { ascending: true });
+    .eq("item_id", item_id)
+    .order("created_at", { ascending: false });
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }

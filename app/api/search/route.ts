@@ -1,17 +1,14 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q") || "";
+export async function POST(req: Request) {
+  const supabase = supabaseServer();
+  const body = await req.json();
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("search_index")
     .select("*")
-    .ilike("content", `%${q}%`);
+    .ilike("content", `%${body.query}%`);
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }
+

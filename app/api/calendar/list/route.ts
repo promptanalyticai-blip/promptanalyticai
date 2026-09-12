@@ -1,14 +1,12 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET() {
-  const { data, error } = await supabaseServer
-    .from("calendar")
+  const supabase = supabaseServer();
+
+  const { data, error } = await supabase
+    .from("versions")
     .select("*")
-    .order("date", { ascending: true });
+    .order("created_at", { ascending: false });
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }

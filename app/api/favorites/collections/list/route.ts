@@ -1,14 +1,17 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
-export async function GET() {
-  const { data, error } = await supabaseServer
-    .from("favorite_collections")
-    .select("*")
-    .order("created_at", { ascending: false });
+export async function POST(req: Request) {
+  const supabase = supabaseServer();
+  const body = await req.json();
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+  const { data, error } = await supabase
+    .from("calendar")
+    .insert({
+      user_id: body.user_id,
+      title: body.title,
+      date: body.date,
+    })
+    .select("*");
 
-  return Response.json({ data });
+  return Response.json({ data, error });
 }

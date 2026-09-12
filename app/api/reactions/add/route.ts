@@ -1,21 +1,17 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
+  const supabase = supabaseServer();
   const body = await req.json();
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("reactions")
     .insert({
-      item_id: body.item_id,
       user_id: body.user_id,
+      item_id: body.item_id,
       type: body.type,
     })
-    .select("*")
-    .single();
+    .select("*");
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }

@@ -1,18 +1,14 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
+  const supabase = supabaseServer();
   const { searchParams } = new URL(req.url);
-  const workspaceId = searchParams.get("workspace_id");
+  const workspace_id = searchParams.get("workspace_id");
 
-  const { data, error } = await supabaseServer
-    .from("metrics")
+  const { data, error } = await supabase
+    .from("workspace_metrics")
     .select("*")
-    .eq("workspace_id", workspaceId)
-    .order("created_at", { ascending: false });
+    .eq("workspace_id", workspace_id);
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json({ data });
+  return Response.json({ data, error });
 }
