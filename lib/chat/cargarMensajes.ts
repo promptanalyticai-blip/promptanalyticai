@@ -1,16 +1,13 @@
-import { supabase } from "@/lib/supabase/server";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function cargarMensajes(chat_id: string) {
+export async function cargarMensajes(conversationId: string) {
+  const supabase = supabaseServer();
+
   const { data, error } = await supabase
-    .from("mensajes")
+    .from("messages")
     .select("*")
-    .eq("chat_id", chat_id)
+    .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.error("Error cargando mensajes:", error);
-    return { data: [] };
-  }
-
-  return { data };
+  return { data, error };
 }

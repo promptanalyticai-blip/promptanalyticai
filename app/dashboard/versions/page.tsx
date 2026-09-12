@@ -1,18 +1,11 @@
 // app/dashboard/versions/page.tsx
-"use client";
-
-import { Header } from "../components/Header";
-import { VersionList } from "./components/VersionList";
+import Header from "../components/Header";
 
 export default function VersionsPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <Header
-        title="Versiones"
-        subtitle="Historial de actualizaciones y cambios del sistema"
-      />
-
-      <VersionList />
-    </div>
+    <>
+      <Header title="Versiones" subtitle="Historial y cambios" />
+      {/* resto de tu contenido */}
+    </>
   );
 }

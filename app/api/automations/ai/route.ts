@@ -1,21 +1,14 @@
-import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
-import { anthropic } from "@/lib/anthropic";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const supabase = createServerSupabase();
+  const supabase = supabaseServer();
+
   const body = await req.json();
 
-  const aiResponse = await anthropic.messages.create({
-    model: "claude-3-sonnet-20240229",
-    max_tokens: 2048,
-    messages: [
-      {
-        role: "user",
-        content: body.input,
-      },
-    ],
-  });
+  const { data, error } = await supabase
+    .from("automations_ai")
+    .insert({ prompt: body.prompt })
+    .select("*");
 
-  return NextResponse.json({ output: aiResponse });
+  return Response.json({ data, error });
 }

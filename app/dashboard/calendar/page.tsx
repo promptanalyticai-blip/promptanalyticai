@@ -1,18 +1,11 @@
 // app/dashboard/calendar/page.tsx
-"use client";
-
-import { Header } from "../components/Header";
-import { CalendarGrid } from "./components/CalendarGrid";
+import Header from "../components/Header";
 
 export default function CalendarPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <Header
-        title="Calendario"
-        subtitle="Eventos y actividades programadas"
-      />
-
-      <CalendarGrid />
-    </div>
+    <>
+      <Header title="Calendario" subtitle="Tu agenda y eventos" />
+      {/* contenido */}
+    </>
   );
 }

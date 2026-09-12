@@ -1,18 +1,11 @@
 // app/dashboard/templates/page.tsx
-"use client";
-
-import { Header } from "../components/Header";
-import { TemplateList } from "./components/TemplateList";
+import Header from "../components/Header";
 
 export default function TemplatesPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <Header
-        title="Plantillas"
-        subtitle="Gestiona y organiza tus plantillas personalizadas"
-      />
-
-      <TemplateList />
-    </div>
+    <>
+      <Header title="Plantillas" subtitle="Gestiona tus templates" />
+      {/* resto de tu contenido */}
+    </>
   );
 }
