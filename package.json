@@ -11,9 +11,11 @@
     "db:push": "drizzle-kit push:pg"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.66",
     "@anthropic-ai/sdk": "^0.125.0",
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.45.0",
+    "ai": "^7.0.99",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.36.0",
