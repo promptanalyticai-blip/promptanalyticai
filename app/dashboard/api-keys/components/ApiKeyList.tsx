@@ -2,80 +2,54 @@
 "use client";
 
 import { useState } from "react";
-import { ApiKeyItem } from "./ApiKeyItem";
 
-export function ApiKeyList() {
-  const [keys, setKeys] = useState([
-    {
-      name: "Producción",
-      key: "pk_live_1234567890abcdef",
-      active: true,
-    },
-    {
-      name: "Desarrollo",
-      key: "pk_dev_abcdef1234567890",
-      active: false,
-    },
-  ]);
+interface ApiKey {
+  name: string;
+  key: string;
+  active: boolean;
+}
 
-  const [newName, setNewName] = useState("");
+interface ApiKeyItemProps {
+  name: string;
+  active: boolean;
+  onToggle: () => void;
+}
 
-  function toggleKey(index: number) {
-    const updated = [...keys];
+function ApiKeyItem({ name, active, onToggle }: ApiKeyItemProps) {
+  return (
+    <div className="flex items-center justify-between p-3 border rounded-md mb-2">
+      <span>{name}</span>
+      <button
+        className={`px-3 py-1 rounded ${
+          active ? "bg-green-500 text-white" : "bg-gray-300"
+        }`}
+        onClick={onToggle}
+      >
+        {active ? "Active" : "Inactive"}
+      </button>
+    </div>
+  );
+}
+
+export default function ApiKeyList({ keys }: { keys: ApiKey[] }) {
+  const [apiKeys, setApiKeys] = useState(keys);
+
+  const toggleKey = (index: number) => {
+    const updated = [...apiKeys];
     updated[index].active = !updated[index].active;
-    setKeys(updated);
-  }
-
-  function createKey() {
-    if (!newName.trim()) return;
-
-    const newKey = {
-      name: newName,
-      key: crypto.randomUUID() + crypto.randomUUID(),
-      active: true,
-    };
-
-    setKeys([newKey, ...keys]);
-    setNewName("");
-  }
+    setApiKeys(updated);
+  };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Crear nueva API Key */}
-      <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 shadow-md">
-        <h3 className="text-lg font-semibold text-slate-100 mb-4">
-          Crear nueva API Key
-        </h3>
-
-        <div className="flex gap-3">
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nombre de la clave"
-            className="flex-1 bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-3 py-2"
-          />
-
-          <button
-            onClick={createKey}
-            className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition text-white font-medium"
-          >
-            Crear
-          </button>
-        </div>
-      </div>
-
-      {/* Lista de claves */}
-      <div className="flex flex-col gap-4">
-        {keys.map((k, index) => (
-          <ApiKeyItem
-            key={index}
-            name={k.name}
-            key={k.key}
-            active={k.active}
-            onToggle={() => toggleKey(index)}
-          />
-        ))}
-      </div>
+    <div>
+      {apiKeys.map((k, index) => (
+        <ApiKeyItem
+          key={index}          {/* ← este es el único key permitido */}
+          name={k.name}
+          active={k.active}
+          onToggle={() => toggleKey(index)}
+        />
+      ))}
     </div>
   );
 }
