@@ -1,26 +1,20 @@
-import { db } from "@/lib/db/client";
-import { prompts } from "@/lib/db/schema";
 import { supabaseServer } from "@/lib/supabase/server";
-import { eq } from "drizzle-orm";
 
-export async function GET() {
-  // Autenticación real con Supabase SSR
+export async function GET(req: Request) {
   const supabase = supabaseServer();
   const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) return Response.json([], { status: 401 });
 
-  // Si no hay usuario, devolver lista vacía
-  if (!userData?.user) {
-    return Response.json([]);
-  }
+  const { searchParams } = new URL(req.url);
+  const workspaceId = searchParams.get("workspaceId");
+  if (!workspaceId) return Response.json([], { status: 400 });
 
-  const userId = userData.user.id;
+  const { data, error } = await supabase
+    .from("prompts")
+    .select("*")
+    .eq("workspaceId", workspaceId);
 
-  // Consultar MySQL con Drizzle
-  const result = await db
-    .select()
-    .from(prompts)
-    .where(eq(prompts.userId, userId));
+  if (error) return Response.json([], { status: 500 });
 
-  // Devolver prompts reales
-  return Response.json(result);
+  return Response.json(data);
 }

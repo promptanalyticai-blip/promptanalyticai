@@ -1,36 +1,20 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { tags, tagRelations } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const supabase = supabaseServer();
   const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData?.user) {
-    return Response.json([], { status: 401 });
-  }
+  if (!userData?.user) return Response.json([], { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const entityId = searchParams.get("entityId");
+  const workspaceId = searchParams.get("workspaceId");
+  if (!workspaceId) return Response.json([], { status: 400 });
 
-  if (!entityId) {
-    return Response.json([], { status: 400 });
-  }
+  const { data, error } = await supabase
+    .from("tags")
+    .select("*")
+    .eq("workspaceId", workspaceId);
 
-  const relations = await db
-    .select()
-    .from(tagRelations)
-    .where(eq(tagRelations.entityId, entityId));
+  if (error) return Response.json([], { status: 500 });
 
-  const tagIds = relations.map((r) => r.tagId);
-
-  if (tagIds.length === 0) return Response.json([]);
-
-  const result = await db
-    .select()
-    .from(tags)
-    .where(tags.id.in(tagIds));
-
-  return Response.json(result);
+  return Response.json(data);
 }

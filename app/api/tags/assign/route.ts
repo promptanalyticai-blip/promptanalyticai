@@ -1,27 +1,22 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { tagRelations } from "@/lib/db/schema";
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const supabase = supabaseServer();
   const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!userData?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { searchParams } = new URL(req.url);
+  const workspaceId = searchParams.get("workspaceId");
+  if (!workspaceId) return Response.json({ error: "Missing workspaceId" }, { status: 400 });
 
-  const { tagId, entityType, entityId } = await req.json();
+  const { data: logs, error } = await supabase
+    .from("logs")
+    .select("*")
+    .eq("workspaceId", workspaceId);
 
-  if (!tagId || !entityType || !entityId) {
-    return Response.json({ error: "Missing fields" }, { status: 400 });
-  }
+  if (error) return Response.json({ error: error.message }, { status: 500 });
 
-  await db.insert(tagRelations).values({
-    id: crypto.randomUUID(),
-    tagId,
-    entityType,
-    entityId,
-  });
+  const score = logs.length * 3; // ejemplo simple, tu logica real puede ser distinta
 
-  return Response.json({ success: true });
+  return Response.json({ score });
 }
