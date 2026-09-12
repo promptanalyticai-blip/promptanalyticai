@@ -1,33 +1,18 @@
-import { NextResponse } from "next/server";
-import { contarTabla, actividadPorDia } from "@/lib/metrics";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId } = await req.json();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const workspaceId = searchParams.get("workspace_id");
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("metrics")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false });
 
-  const analisis = await contarTabla("analisis", workspaceId);
-  const prompts = await contarTabla("prompts", workspaceId);
-  const archivos = await contarTabla("files", workspaceId);
-  const tareas = await contarTabla("tasks", workspaceId);
-  const equipos = await contarTabla("teams", workspaceId);
-  const versiones = await contarTabla("versions", workspaceId);
-  const automations = await contarTabla("automations", workspaceId);
-  const reportes = await contarTabla("reports", workspaceId);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const actividad = await actividadPorDia("analisis", workspaceId);
-
-  return NextResponse.json({
-    analisis,
-    prompts,
-    archivos,
-    tareas,
-    equipos,
-    versiones,
-    automations,
-    reportes,
-    actividad
-  });
+  return Response.json({ data });
 }

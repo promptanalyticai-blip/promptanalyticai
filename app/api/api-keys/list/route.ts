@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { obtenerApiKeys } from "@/lib/apiKeys";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId } = await req.json();
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("api_keys")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const keys = await obtenerApiKeys(workspaceId);
-
-  return NextResponse.json(keys.data || []);
+  return Response.json({ data });
 }

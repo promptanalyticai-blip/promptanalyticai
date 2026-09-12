@@ -1,14 +1,18 @@
-import { NextResponse } from "next/server";
-import { cargarComentarios } from "@/lib/comments";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId, recursoId } = await req.json();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const itemId = searchParams.get("item_id");
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("comments")
+    .select("*")
+    .eq("item_id", itemId)
+    .order("created_at", { ascending: true });
 
-  const comentarios = await cargarComentarios(workspaceId, recursoId);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  return NextResponse.json(comentarios.data || []);
+  return Response.json({ data });
 }
