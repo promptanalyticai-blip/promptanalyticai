@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase/server";
 
 export async function cargarMensajes(chat_id: string) {
   const { data, error } = await supabase
