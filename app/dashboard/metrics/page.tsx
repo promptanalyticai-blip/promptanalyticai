@@ -4,8 +4,11 @@
 import Header from "../components/Header";
 import { supabase } from "@/lib/supabaseClient";
 
-export default async function MetricsPage() {
-  const { data } = await supabase.from("metrics").select("*");
+export default function MetricsPage() {
+  async function loadMetrics() {
+    const { data } = await supabase.from("metrics").select("*");
+    return data;
+  }
 
   return (
     <div className="p-6">
