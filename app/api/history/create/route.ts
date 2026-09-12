@@ -1,22 +1,14 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { auditLogs } from "@/lib/db/schema";
 
 export async function POST(req: Request) {
   const supabase = supabaseServer();
   const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!userData?.user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const { workspaceId, action, entityType, entityId, details } = await req.json();
+  if (!workspaceId || !action) return Response.json({ error: "Missing fields" }, { status: 400 });
 
-  if (!workspaceId || !action) {
-    return Response.json({ error: "Missing fields" }, { status: 400 });
-  }
-
-  await db.insert(auditLogs).values({
+  await supabase.from("auditLogs").insert({
     id: crypto.randomUUID(),
     workspaceId,
     userId: userData.user.id,

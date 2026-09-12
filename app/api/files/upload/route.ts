@@ -1,14 +1,9 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { db } from "@/lib/db/client";
-import { files } from "@/lib/db/schema";
 
 export async function POST(req: Request) {
   const supabase = supabaseServer();
   const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!userData?.user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const formData = await req.formData();
   const file = formData.get("file") as File;
@@ -23,19 +18,13 @@ export async function POST(req: Request) {
 
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from("archivos")
-    .upload(fileName, fileBuffer, {
-      contentType: file.type,
-    });
+    .upload(fileName, fileBuffer, { contentType: file.type });
 
-  if (uploadError) {
-    return Response.json({ error: uploadError.message }, { status: 500 });
-  }
+  if (uploadError) return Response.json({ error: uploadError.message }, { status: 500 });
 
-  const { data: publicUrl } = supabase.storage
-    .from("archivos")
-    .getPublicUrl(fileName);
+  const { data: publicUrl } = supabase.storage.from("archivos").getPublicUrl(fileName);
 
-  await db.insert(files).values({
+  await supabase.from("files").insert({
     id: crypto.randomUUID(),
     userId: userData.user.id,
     workspaceId,
@@ -44,8 +33,5 @@ export async function POST(req: Request) {
     size: file.size,
   });
 
-  return Response.json({
-    success: true,
-    url: publicUrl.publicUrl,
-  });
+  return Response.json({ success: true, url: publicUrl.publicUrl });
 }
