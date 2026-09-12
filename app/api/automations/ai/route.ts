@@ -12,9 +12,9 @@ export async function POST(req: Request) {
     messages: [
       {
         role: "user",
-        content: body.input
-      }
-    ]
+        content: body.input,
+      },
+    ],
   });
 
   return NextResponse.json({ output: aiResponse });

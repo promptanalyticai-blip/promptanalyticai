@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       name: body.name,
       description: body.description,
       trigger: body.trigger,
-      action: body.action
+      action: body.action,
     })
     .select()
     .single();
