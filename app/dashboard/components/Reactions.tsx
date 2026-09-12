@@ -1,17 +1,17 @@
-export default function Reactions({ reactions = [] }) {
+"use client";
+
+export default function Reactions({ likes = 0, dislikes = 0 }) {
   return (
-    <div>
-      {reactions.length === 0 ? (
-        <p className="text-gray-500">Sin reacciones</p>
-      ) : (
-        <ul className="space-y-2">
-          {reactions.map((r, i) => (
-            <li key={i} className="p-2 border rounded-lg dark:border-gray-700">
-              {r}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="flex items-center gap-4 p-4 bg-slate-900 border border-slate-800 rounded-lg">
+      <div className="flex items-center gap-2">
+        <span className="text-green-400 text-xl">👍</span>
+        <span className="text-slate-300">{likes}</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-red-400 text-xl">👎</span>
+        <span className="text-slate-300">{dislikes}</span>
+      </div>
     </div>
   );
 }

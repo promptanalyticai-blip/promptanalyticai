@@ -1,14 +1,21 @@
 "use client";
 
-import Header from "../components/Header";
+import Header from "../dashboard/components/Header";
 import { supabase } from "@/lib/supabaseClient";
 
-export default async function ReportsPage() {
-  const { data } = await supabase.from("reports").select("*");
+export default function ReportsPage() {
+  async function loadReports() {
+    const { data: reports } = await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    return reports;
+  }
 
   return (
     <div className="p-6">
-      <Header title="Reports" subtitle="Historial de reportes" />
+      <Header title="Reports" subtitle="Historial de reportes del workspace" />
     </div>
   );
 }

@@ -1,72 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import Reactions from "../../../dashboard/components/Reactions";
+import Tags from "../../../dashboard/components/Tags";
+import Tasks from "../../../dashboard/components/Tasks";
 
-export default function AnalyzePage() {
-  const [text, setText] = useState("");
-  const [type, setType] = useState("general");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+export default async function AnalysisDetailPage({ params }) {
+  const { id } = params;
 
-  async function handleAnalyze() {
-    setLoading(true);
+  // Cargar análisis
+  const { data: analysis } = await supabase
+    .from("analysis")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text, type }),
-      });
+  // Cargar reacciones
+  const { data: reactions } = await supabase
+    .from("reactions")
+    .select("*")
+    .eq("analysis_id", id);
 
-      const data = await res.json();
-      setResult(data.analysis ?? "No se recibió un análisis.");
-    } catch (error) {
-      setResult("Hubo un error al analizar el texto.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Cargar tags
+  const { data: tags } = await supabase
+    .from("tags")
+    .select("*")
+    .eq("analysis_id", id);
+
+  // Cargar tareas
+  const { data: tasks } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("analysis_id", id);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Analyze</h1>
+    <div className="p-6 space-y-6">
+      {/* Título */}
+      <h1 className="text-2xl font-bold text-slate-100">
+        {analysis?.title || "Análisis"}
+      </h1>
 
-      <select
-        className="border p-3 rounded-lg"
-        value={type}
-        onChange={(e) => setType(e.target.value)}
-      >
-        <option value="general">General</option>
-        <option value="marketing">Marketing</option>
-        <option value="realestate">Real Estate</option>
-        <option value="ecommerce">E-commerce</option>
-        <option value="legal">Legal</option>
-        <option value="rrhh">Recursos Humanos (RRHH)</option>
-      </select>
+      {/* Descripción */}
+      <p className="text-slate-400">{analysis?.description}</p>
 
-      <textarea
-        className="w-full p-4 border rounded-lg h-48"
-        placeholder="Pega tu texto aquí..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
+      {/* Reacciones */}
+      <div>
+        <h2 className="text-xl font-semibold text-slate-200 mb-2">
+          Reacciones
+        </h2>
+        <Reactions
+          likes={reactions?.filter((r) => r.type === "like").length || 0}
+          dislikes={reactions?.filter((r) => r.type === "dislike").length || 0}
+        />
+      </div>
 
-      <button
-        onClick={handleAnalyze}
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50"
-        disabled={loading || !text.trim()}
-      >
-        {loading ? "Analizando..." : "Analizar"}
-      </button>
+      {/* Tags */}
+      <div>
+        <h2 className="text-xl font-semibold text-slate-200 mb-2">Tags</h2>
+        <Tags tags={tags?.map((t) => t.name) || []} />
+      </div>
 
-      {result && (
-        <div className="p-6 bg-white shadow rounded-lg">
-          <h2 className="text-xl font-bold mb-4">Resultado</h2>
-          <pre className="whitespace-pre-wrap">{result}</pre>
-        </div>
-      )}
+      {/* Tareas */}
+      <div>
+        <h2 className="text-xl font-semibold text-slate-200 mb-2">Tareas</h2>
+        <Tasks tasks={tasks || []} />
+      </div>
     </div>
   );
 }
