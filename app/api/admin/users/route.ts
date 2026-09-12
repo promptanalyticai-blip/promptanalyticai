@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { esSuperadmin, cargarUsuarios } from "@/lib/admin";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST() {
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("users")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const permitido = await esSuperadmin(auth.user.id);
-  if (!permitido) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const users = await cargarUsuarios();
-  return NextResponse.json(users.data || []);
+  return Response.json({ data });
 }

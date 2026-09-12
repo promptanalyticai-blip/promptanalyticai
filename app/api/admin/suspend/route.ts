@@ -1,17 +1,18 @@
-import { NextResponse } from "next/server";
-import { esSuperadmin, suspenderUsuario } from "@/lib/admin";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const { userId } = await req.json();
+  const body = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("users")
+    .update({ suspended: true })
+    .eq("id", body.user_id)
+    .select("*")
+    .single();
 
-  const permitido = await esSuperadmin(auth.user.id);
-  if (!permitido) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  await suspenderUsuario(userId);
-
-  return NextResponse.json({ ok: true });
+  return Response.json({ data });
 }

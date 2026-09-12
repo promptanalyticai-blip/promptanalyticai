@@ -1,25 +1,14 @@
-import { NextResponse } from "next/server";
-import { validarToken } from "@/lib/apiKeys";
-import { registrarUso, verificarRateLimit } from "@/lib/rateLimit";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { token, promptId } = await req.json();
-
-  const key = await validarToken(token);
-  if (!key) return NextResponse.json({ error: "Token inválido" }, { status: 403 });
-
-  if (await verificarRateLimit(token)) {
-    return NextResponse.json({ error: "Rate limit excedido" }, { status: 429 });
-  }
-
-  await registrarUso(token);
-
-  const { data } = await supabase
+export async function GET() {
+  const { data, error } = await supabaseServer
     .from("prompts")
     .select("*")
-    .eq("id", promptId)
-    .single();
+    .order("created_at", { ascending: false });
 
-  return NextResponse.json(data || {});
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ data });
 }

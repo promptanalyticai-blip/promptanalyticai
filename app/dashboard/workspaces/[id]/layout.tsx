@@ -1,42 +1,40 @@
 // app/dashboard/workspaces/[id]/layout.tsx
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { obtenerRolWorkspace } from "@/lib/workspaceRole"; // ← IMPORT CORREGIDO
+"use client";
 
-export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  const [allowed, setAllowed] = useState(false);
+import { ReactNode, useEffect, useState } from "react";
+import { supabaseBrowser } from "@/lib/supabase/browser";
+
+export default function WorkspaceLayout({
+  params,
+  children,
+}: {
+  params: { id: string };
+  children: ReactNode;
+}) {
+  const [workspace, setWorkspace] = useState<any>(null);
 
   useEffect(() => {
-    async function checkRole() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const loadWorkspace = async () => {
+      const { data, error } = await supabaseBrowser
+        .from("workspaces")
+        .select("*")
+        .eq("id", params.id)
+        .single();
 
-      if (!user) {
-        setAllowed(false);
-        return;
+      if (!error) {
+        setWorkspace(data);
       }
+    };
 
-      const workspaceId = window.location.pathname.split("/").pop();
-      const role = await obtenerRolWorkspace(user.id, workspaceId!);
+    loadWorkspace();
+  }, [params.id]);
 
-      if (role === "owner" || role === "admin") {
-        setAllowed(true);
-      } else {
-        setAllowed(false);
-      }
-    }
-
-    checkRole();
-  }, []);
-
-  if (!allowed) {
-    return (
-      <div className="p-6 text-center text-red-500">
-        No tienes permisos para acceder a este workspace.
-      </div>
-    );
-  }
-
-  return <>{children}</>;
+  return (
+    <div className="p-6">
+      <h1 className="text-xl font-bold">
+        Workspace: {workspace ? workspace.name : "Cargando..."}
+      </h1>
+      <div className="mt-4">{children}</div>
+    </div>
+  );
 }

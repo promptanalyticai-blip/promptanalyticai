@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { cargarEventos } from "@/lib/calendar";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId } = await req.json();
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("calendar")
+    .select("*")
+    .order("date", { ascending: true });
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const eventos = await cargarEventos(workspaceId);
-
-  return NextResponse.json(eventos.data || []);
+  return Response.json({ data });
 }

@@ -1,14 +1,16 @@
-import { NextResponse } from "next/server";
-import { terminarSesion } from "@/lib/security";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const { id } = await req.json();
+  const body = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { error } = await supabaseServer
+    .from("sessions")
+    .delete()
+    .eq("id", body.session_id);
 
-  await terminarSesion(id);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  return NextResponse.json({ ok: true });
+  return Response.json({ success: true });
 }

@@ -1,18 +1,20 @@
-import { NextResponse } from "next/server";
-import { obtenerWebhooks, enviarWebhook } from "@/lib/webhooks";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const { workspaceId, evento, payload } = await req.json();
+  const body = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("webhook_logs")
+    .insert({
+      webhook_id: body.webhook_id,
+      payload: body.payload,
+    })
+    .select("*")
+    .single();
 
-  const webhooks = await obtenerWebhooks(workspaceId, evento);
-
-  for (const wh of webhooks) {
-    await enviarWebhook(wh, payload);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return Response.json({ data });
 }

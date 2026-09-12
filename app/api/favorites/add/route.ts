@@ -1,22 +1,21 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
-import { registrarAccion } from "@/lib/auditoria";
-import { crearNotificacion } from "@/lib/notifications";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const { workspaceId, recursoId, tipo, collectionId } = await req.json();
+  const body = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("favorites")
+    .insert({
+      item_id: body.item_id,
+      user_id: body.user_id,
+      collection_id: body.collection_id,
+    })
+    .select("*")
+    .single();
 
-  const userId = auth.user.id;
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  await supabase.from("favorites").insert([
-    { workspace_id: workspaceId, user_id: userId, recurso_id: recursoId, tipo, collection_id: collectionId }
-  ]);
-
-  await registrarAccion(workspaceId, userId, "agregar favorito", `Recurso: ${recursoId}`);
-  await crearNotificacion(workspaceId, userId, "favoritos", "Se agregó un favorito.");
-
-  return NextResponse.json({ ok: true });
+  return Response.json({ data });
 }

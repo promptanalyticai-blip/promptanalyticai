@@ -1,22 +1,21 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
-import { registrarAccion } from "@/lib/auditoria";
-import { crearNotificacion } from "@/lib/notifications";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-  const { workspaceId, titulo, descripcion, fecha, hora } = await req.json();
+  const body = await req.json();
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("calendar")
+    .insert({
+      title: body.title,
+      date: body.date,
+      description: body.description,
+    })
+    .select("*")
+    .single();
 
-  const userId = auth.user.id;
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  await supabase.from("calendar_events").insert([
-    { workspace_id: workspaceId, user_id: userId, titulo, descripcion, fecha, hora }
-  ]);
-
-  await registrarAccion(workspaceId, userId, "crear evento", titulo);
-  await crearNotificacion(workspaceId, userId, "calendario", "Nuevo evento creado.");
-
-  return NextResponse.json({ ok: true });
+  return Response.json({ data });
 }

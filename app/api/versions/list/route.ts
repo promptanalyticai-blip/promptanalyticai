@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { cargarVersiones } from "@/lib/versions";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId, recursoId } = await req.json();
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("versions")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const versiones = await cargarVersiones(workspaceId, recursoId);
-
-  return NextResponse.json(versiones.data || []);
+  return Response.json({ data });
 }

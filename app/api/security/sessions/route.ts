@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
-import { cargarSesiones } from "@/lib/security";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("sessions")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const sesiones = await cargarSesiones(auth.user.id);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  return NextResponse.json(sesiones.data || []);
+  return Response.json({ data });
 }

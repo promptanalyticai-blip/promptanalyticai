@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
-import { buscarEnWorkspace } from "@/lib/search";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { query, workspaceId } = await req.json();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q") || "";
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const { data, error } = await supabaseServer
+    .from("search_index")
+    .select("*")
+    .ilike("content", `%${q}%`);
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
   }
 
-  const resultados = await buscarEnWorkspace(workspaceId, query);
-
-  return NextResponse.json(resultados);
+  return Response.json({ data });
 }

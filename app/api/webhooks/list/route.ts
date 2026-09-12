@@ -1,16 +1,14 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId } = await req.json();
-
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-
-  const { data } = await supabase
+export async function GET() {
+  const { data, error } = await supabaseServer
     .from("webhooks")
     .select("*")
-    .eq("workspace_id", workspaceId);
+    .order("created_at", { ascending: false });
 
-  return NextResponse.json(data || []);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ data });
 }

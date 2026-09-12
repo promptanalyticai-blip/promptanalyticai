@@ -1,21 +1,38 @@
 "use client";
 
-import Header from "../dashboard/components/Header";
-import { supabase } from "@/lib/supabaseClient";
+import { useEffect, useState } from "react";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function ReportsPage() {
-  async function loadReports() {
-    const { data: reports } = await supabase
-      .from("reports")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const [reports, setReports] = useState<any[]>([]);
 
-    return reports;
-  }
+  useEffect(() => {
+    const loadReports = async () => {
+      const { data, error } = await supabaseBrowser
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        setReports(data);
+      }
+    };
+
+    loadReports();
+  }, []);
 
   return (
     <div className="p-6">
-      <Header title="Reports" subtitle="Historial de reportes del workspace" />
+      <h1 className="text-xl font-bold">Reports</h1>
+
+      <ul className="mt-4">
+        {reports.map((r) => (
+          <li key={r.id} className="border p-2 rounded mb-2">
+            <strong>{r.title}</strong>
+            <p>{r.summary}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

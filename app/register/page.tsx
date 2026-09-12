@@ -1,84 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
 
   const handleRegister = async () => {
-    setError("");
+    setStatus("Procesando...");
 
-    // 1. Crear usuario en Supabase Auth
-    const { data, error: authError } = await supabase.auth.signUp({
+    const { error } = await supabaseBrowser.auth.signUp({
       email,
       password,
     });
 
-    if (authError) {
-      setError(authError.message);
+    if (error) {
+      setStatus("Error: " + error.message);
       return;
     }
 
-    const user = data.user;
-
-    // 2. Crear perfil en la tabla profiles
-    const { error: profileError } = await supabase.from("profiles").insert({
-      user_id: user?.id,
-      full_name: fullName,
-      role: "user",
-    });
-
-    if (profileError) {
-      setError(profileError.message);
-      return;
-    }
-
-    // 3. Redirigir al dashboard
-    router.push("/dashboard");
+    setStatus("Registro exitoso. Revisa tu correo para confirmar.");
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6">Crear cuenta</h1>
-
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
-      <input
-        type="text"
-        placeholder="Nombre completo"
-        className="w-full p-3 border rounded mb-4"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-      />
+    <div className="flex flex-col gap-4 p-6 max-w-md mx-auto">
+      <h1 className="text-xl font-bold">Registro</h1>
 
       <input
         type="email"
-        placeholder="Correo electrónico"
-        className="w-full p-3 border rounded mb-4"
+        placeholder="Correo"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        className="border p-2 rounded"
       />
 
       <input
         type="password"
         placeholder="Contraseña"
-        className="w-full p-3 border rounded mb-4"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        className="border p-2 rounded"
       />
 
       <button
         onClick={handleRegister}
-        className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
+        className="bg-green-600 text-white p-2 rounded"
       >
-        Registrarme
+        Registrarse
       </button>
+
+      {status && <p>{status}</p>}
     </div>
   );
 }

@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { cargarColecciones } from "@/lib/favorites";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  const { workspaceId } = await req.json();
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("favorite_collections")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 
-  const colecciones = await cargarColecciones(workspaceId);
-
-  return NextResponse.json(colecciones.data || []);
+  return Response.json({ data });
 }
