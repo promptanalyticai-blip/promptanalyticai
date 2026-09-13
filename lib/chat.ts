@@ -1,26 +1,22 @@
-import { supabase } from "./supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearChat(userId: string, workspaceId: string | null, titulo: string) {
+export async function crearChat(
+  userId: string,
+  workspaceId: string | null,
+  titulo: string
+) {
+  const supabase = createClient();
+
   return await supabase
     .from("chats")
-    .insert([{ user_id: userId, workspace_id: workspaceId, titulo }])
+    .insert([
+      {
+        user_id: userId,
+        workspace_id: workspaceId,
+        title: titulo,
+        created_at: new Date().toISOString()
+      }
+    ])
     .select()
     .single();
-}
-
-export async function cargarChats(userId: string, workspaceId: string | null) {
-  return await supabase
-    .from("chats")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("workspace_id", workspaceId)
-    .order("id", { ascending: false });
-}
-
-export async function cargarMensajes(chatId: string) {
-  return await supabase
-    .from("mensajes")
-    .select("*")
-    .eq("chat_id", chatId)
-    .order("id", { ascending: true });
 }
