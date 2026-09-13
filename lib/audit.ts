@@ -1,27 +1,19 @@
-import { db } from "./drizzle";
-import { auditLogs } from "./schema";
 import { z } from "zod";
 
-const auditSchema = z.object({
-  userId: z.string().optional(),
+export const auditSchema = z.object({
   action: z.string(),
   entity: z.string().optional(),
   entityId: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+
+  // Zod requiere DOS argumentos: tipo de clave y tipo de valor
+  metadata: z.record(z.string(), z.any()).optional(),
+
   ip: z.string().optional(),
   userAgent: z.string().optional()
 });
 
-export async function logAuditEvent(input: z.infer<typeof auditSchema>) {
-  const data = auditSchema.parse(input);
-
-  await db.insert(auditLogs).values({
-    userId: data.userId ?? null,
-    action: data.action,
-    entity: data.entity ?? null,
-    entityId: data.entityId ?? null,
-    metadata: data.metadata ?? {},
-    ip: data.ip ?? null,
-    userAgent: data.userAgent ?? null
-  });
+// Si tienes funciones que usan este schema, puedes agregarlas aquí.
+// Por ejemplo, validar un payload antes de guardarlo:
+export function validarAudit(data: unknown) {
+  return auditSchema.parse(data);
 }
