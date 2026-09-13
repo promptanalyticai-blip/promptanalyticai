@@ -1,29 +1,35 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearTeam(nombre: string, workspaceId: string, userId: string) {
-  return supabase.from("teams").insert([
-    { nombre, workspace_id: workspaceId, owner_id: userId }
-  ]);
-}
+export async function crearTeam(
+  nombre: string,
+  workspaceId: string,
+  userId: string
+) {
+  const supabase = createClient();
 
-export async function cargarTeams(workspaceId: string) {
   return supabase
     .from("teams")
-    .select("*, team_members(user_id)")
-    .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
+    .insert([
+      {
+        nombre,
+        workspace_id: workspaceId,
+        user_id: userId,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
 }
 
-export async function agregarMiembro(teamId: string, userId: string) {
-  return supabase.from("team_members").insert([
-    { team_id: teamId, user_id: userId }
-  ]);
-}
+export async function obtenerTeams(workspaceId: string) {
+  const supabase = createClient();
 
-export async function eliminarMiembro(teamId: string, userId: string) {
-  return supabase
-    .from("team_members")
-    .delete()
-    .eq("team_id", teamId)
-    .eq("user_id", userId);
+  const { data, error } = await supabase
+    .from("teams")
+    .select("*")
+    .eq("workspace_id", workspaceId);
+
+  if (error) throw error;
+
+  return data;
 }
