@@ -7,7 +7,7 @@ export default function PromptsPage() {
     <div className="p-6 fade-in">
       <h1 className="text-3xl font-bold mb-4">Prompts</h1>
 
-      <Reactions reactions={["🔥", "💡", "👍"]} />
+      <Reactions likes={45} dislikes={2} />
     </div>
   );
 }
