@@ -8,7 +8,7 @@ export function generarExcel(titulo: string, datos: any[]) {
 
   const excelBuffer = XLSX.write(workbook, {
     bookType: "xlsx",
-    type: "array",
+    type: "array"
   });
 
   return excelBuffer;

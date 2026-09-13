@@ -1,32 +1,30 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function obtenerWebhooks(workspaceId: string, evento: string) {
-  const { data } = await supabase
+export async function registrarWebhook(workspaceId: string, url: string, evento: string) {
+  const supabase = createClient();
+
+  return supabase
+    .from("webhooks")
+    .insert([
+      {
+        workspace_id: workspaceId,
+        url,
+        evento,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
+}
+
+export async function obtenerWebhooks(workspaceId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("webhooks")
     .select("*")
-    .eq("workspace_id", workspaceId)
-    .eq("evento", evento);
+    .eq("workspace_id", workspaceId);
 
-  return data || [];
-}
-
-export async function registrarLog(webhookId: string, status: string, respuesta: string) {
-  await supabase.from("webhook_logs").insert([
-    { webhook_id: webhookId, status, respuesta }
-  ]);
-}
-
-export async function enviarWebhook(webhook: any, payload: any) {
-  try {
-    const res = await fetch(webhook.url, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const text = await res.text();
-    await registrarLog(webhook.id, "success", text);
-  } catch (err: any) {
-    await registrarLog(webhook.id, "error", err.message);
-  }
+  if (error) throw error;
+  return data;
 }

@@ -1,23 +1,30 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function obtenerRolWorkspace(userId: string, workspaceId: string) {
-  const { data, error } = await supabase
-    .from("workspace_members")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("workspace_id", workspaceId)
+export async function asignarRolWorkspace(workspaceId: string, userId: string, rol: string) {
+  const supabase = createClient();
+
+  return supabase
+    .from("workspace_roles")
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        rol,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
     .single();
-
-  if (error) {
-    console.error("Error obteniendo rol:", error);
-    return null;
-  }
-
-  return data?.role || null;
 }
 
-export const workspaceRoles = {
-  OWNER: "owner",
-  ADMIN: "admin",
-  MEMBER: "member",
-};
+export async function obtenerRolesWorkspace(workspaceId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("workspace_roles")
+    .select("*")
+    .eq("workspace_id", workspaceId);
+
+  if (error) throw error;
+  return data;
+}

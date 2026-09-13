@@ -1,19 +1,29 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearWorkspace(nombre: string, userId: string) {
-  // Crear workspace
-  const { data: ws, error } = await supabase
+export async function crearWorkspace(nombre: string, ownerId: string) {
+  const supabase = createClient();
+
+  return supabase
     .from("workspaces")
-    .insert([{ nombre, user_id: userId }])
+    .insert([
+      {
+        nombre,
+        owner_id: ownerId,
+        created_at: new Date().toISOString()
+      }
+    ])
     .select()
     .single();
+}
+
+export async function obtenerWorkspaces(userId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("workspaces")
+    .select("*")
+    .eq("owner_id", userId);
 
   if (error) throw error;
-
-  // Auto-asignar rol owner
-  await supabase.from("workspace_members").insert([
-    { user_id: userId, workspace_id: ws.id, role: "owner" }
-  ]);
-
-  return ws;
+  return data;
 }
