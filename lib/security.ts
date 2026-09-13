@@ -1,16 +1,40 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export async function cargarSesiones(userId: string) {
-  return supabase
-    .from("user_sessions")
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("security_logs")
     .select("*")
     .eq("user_id", userId)
-    .order("creado", { ascending: false });
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
 }
 
-export async function terminarSesion(id: string) {
-  return supabase
-    .from("user_sessions")
-    .update({ activo: false })
-    .eq("id", id);
+export async function registrarSesion(
+  userId: string,
+  ip: string,
+  userAgent: string
+) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("security_logs")
+    .insert([
+      {
+        user_id: userId,
+        ip,
+        user_agent: userAgent,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
 }
