@@ -4,16 +4,17 @@ import { useEffect, useState } from "react";
 import { getHistorial } from "@/lib/historialSupabase";
 
 export default function HistorialPage() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    getHistorial().then(setItems);
+    getHistorial().then((res) => setItems(res.data));
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">Historial</h1>
-      <pre className="mt-4">{JSON.stringify(items, null, 2)}</pre>
+    <div>
+      <h1 className="text-3xl font-bold mb-4">Historial</h1>
+
+      <pre>{JSON.stringify(items, null, 2)}</pre>
     </div>
   );
 }
