@@ -1,15 +1,22 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function registrarAccion(workspaceId: string, userId: string, accion: string, detalle: string = "") {
-  return supabase.from("audit_logs").insert([
-    { workspace_id: workspaceId, user_id: userId, accion, detalle }
-  ]);
-}
+export async function registrarAccion(
+  workspaceId: string,
+  userId: string,
+  accion: string,
+  detalle: string = ""
+) {
+  const supabase = createClient();
 
-export async function cargarAuditoria(workspaceId: string) {
   return supabase
     .from("audit_logs")
-    .select("*, user_id")
-    .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        action: accion,
+        detail: detalle,
+        created_at: new Date().toISOString()
+      }
+    ]);
 }
