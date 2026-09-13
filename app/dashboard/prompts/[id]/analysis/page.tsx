@@ -9,11 +9,12 @@ export default function PromptAnalysisPage({ params }) {
 
   return (
     <div className="fade-in p-6">
-      <h1 className="text-3xl font-bold mb-4">Análisis del Prompt #{id}</h1>
+      <h1 className="text-3xl font-bold mb-4">Analisis del Prompt #{id}</h1>
 
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Reacciones</h2>
-        <Reactions reactions={["👍", "🔥", "💡"]} />
+        <Reactions likes={120} dislikes={3} />
+
       </div>
 
       <div className="mb-6">
