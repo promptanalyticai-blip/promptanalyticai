@@ -1,30 +1,23 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 import { randomUUID } from "crypto";
 
 export async function crearApiKey(workspaceId: string, nombre: string) {
-  const token = randomUUID() + "-" + randomUUID();
+  const supabase = createClient();
 
-  await supabase.from("api_keys").insert([
-    { workspace_id: workspaceId, nombre, token }
-  ]);
+  const nuevaKey = randomUUID();
 
-  return token;
-}
-
-export async function obtenerApiKeys(workspaceId: string) {
-  return supabase
+  const { data, error } = await supabase
     .from("api_keys")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
-}
-
-export async function validarToken(token: string) {
-  const { data } = await supabase
-    .from("api_keys")
-    .select("*")
-    .eq("token", token)
+    .insert({
+      id: nuevaKey,
+      workspace_id: workspaceId,
+      name: nombre,
+      created_at: new Date().toISOString(),
+    })
+    .select()
     .single();
+
+  if (error) throw error;
 
   return data;
 }
