@@ -1,16 +1,40 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function guardarVersion(workspaceId: string, userId: string, recursoId: string, tipo: string, contenido: string) {
-  return supabase.from("versions").insert([
-    { workspace_id: workspaceId, user_id: userId, recurso_id: recursoId, tipo, contenido }
-  ]);
-}
+export async function guardarVersion(
+  workspaceId: string,
+  userId: string,
+  recursoId: string,
+  tipo: string,
+  contenido: string
+) {
+  const supabase = createClient();
 
-export async function cargarVersiones(workspaceId: string, recursoId: string) {
   return supabase
     .from("versions")
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        resource_id: recursoId,
+        tipo,
+        contenido,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
+}
+
+export async function obtenerVersiones(recursoId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("versions")
     .select("*")
-    .eq("workspace_id", workspaceId)
-    .eq("recurso_id", recursoId)
-    .order("creado", { ascending: false });
+    .eq("resource_id", recursoId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
 }
