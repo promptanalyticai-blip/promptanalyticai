@@ -1,17 +1,16 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export async function registrarUso(token: string) {
-  await supabase.from("api_usage").insert([{ token }]);
-}
+  const supabase = createClient();
 
-export async function verificarRateLimit(token: string, limite: number = 100) {
-  const { data } = await supabase
+  const { error } = await supabase
     .from("api_usage")
-    .select("*")
-    .eq("token", token)
-    .gte("fecha", new Date(Date.now() - 60 * 60 * 1000).toISOString()); // última hora
+    .insert([
+      {
+        token,
+        created_at: new Date().toISOString()
+      }
+    ]);
 
-  if (!data) return false;
-
-  return data.length >= limite;
+  if (error) throw error;
 }
