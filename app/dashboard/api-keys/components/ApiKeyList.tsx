@@ -44,7 +44,7 @@ export default function ApiKeyList({ keys }: { keys: ApiKey[] }) {
     <div>
       {apiKeys.map((k, index) => (
         <ApiKeyItem
-          key={index}          {/* ← este es el único key permitido */}
+          key={index}
           name={k.name}
           active={k.active}
           onToggle={() => toggleKey(index)}
