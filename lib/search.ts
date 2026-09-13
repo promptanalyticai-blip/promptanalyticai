@@ -1,45 +1,17 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export async function buscarEnWorkspace(workspaceId: string, query: string) {
+  const supabase = createClient();
+
   const q = `%${query}%`;
 
-  const [prompts, templates, archivos, analisis, teams] = await Promise.all([
-    supabase
-      .from("prompts")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .ilike("nombre", q),
+  const { data, error } = await supabase
+    .from("resources")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .or(`nombre.ilike.${q},descripcion.ilike.${q}`);
 
-    supabase
-      .from("templates")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .ilike("nombre", q),
+  if (error) throw error;
 
-    supabase
-      .from("files")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .ilike("nombre", q),
-
-    supabase
-      .from("analisis")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .ilike("texto", q),
-
-    supabase
-      .from("teams")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .ilike("nombre", q)
-  ]);
-
-  return {
-    prompts: prompts.data || [],
-    templates: templates.data || [],
-    archivos: archivos.data || [],
-    analisis: analisis.data || [],
-    teams: teams.data || []
-  };
+  return data;
 }
