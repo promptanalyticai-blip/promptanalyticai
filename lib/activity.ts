@@ -1,9 +1,11 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export async function cargarActividad(workspaceId: string) {
+  const supabase = createClient();
+
   return supabase
-    .from("audit_logs")
-    .select("*, user_id")
+    .from("activity")
+    .select("*")
     .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
+    .order("created_at", { ascending: false });
 }
