@@ -1,12 +1,12 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function getHistorial() {
-  const { data, error } = await supabaseServer
+  const supabase = supabaseServer();
+
+  const { data, error } = await supabase
     .from("historial")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) throw new Error(error.message);
-
-  return data;
+  return { data, error };
 }
