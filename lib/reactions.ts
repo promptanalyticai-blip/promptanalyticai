@@ -1,16 +1,26 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function agregarReaccion(workspaceId: string, userId: string, recursoId: string, tipo: string, emoji?: string) {
-  return supabase.from("reactions").insert([
-    { workspace_id: workspaceId, user_id: userId, recurso_id: recursoId, tipo, emoji }
-  ]);
-}
+export async function agregarReaccion(
+  workspaceId: string,
+  userId: string,
+  recursoId: string,
+  tipo: string,
+  emoji?: string
+) {
+  const supabase = createClient();
 
-export async function cargarReacciones(workspaceId: string, recursoId: string) {
   return supabase
     .from("reactions")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .eq("recurso_id", recursoId)
-    .order("creado", { ascending: false });
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        resource_id: recursoId,
+        type: tipo,
+        emoji: emoji ?? null,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
 }
