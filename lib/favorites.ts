@@ -1,30 +1,22 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearColeccion(workspaceId: string, userId: string, nombre: string) {
-  return supabase.from("favorite_collections").insert([
-    { workspace_id: workspaceId, user_id: userId, nombre }
-  ]);
-}
+export async function crearColeccion(
+  workspaceId: string,
+  userId: string,
+  nombre: string
+) {
+  const supabase = createClient();
 
-export async function cargarColecciones(workspaceId: string) {
   return supabase
     .from("favorite_collections")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
-}
-
-export async function agregarFavorito(workspaceId: string, userId: string, recursoId: string, tipo: string, collectionId: string) {
-  return supabase.from("favorites").insert([
-    { workspace_id: workspaceId, user_id: userId, recurso_id: recursoId, tipo, collection_id: collectionId }
-  ]);
-}
-
-export async function cargarFavoritos(workspaceId: string, collectionId: string) {
-  return supabase
-    .from("favorites")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .eq("collection_id", collectionId)
-    .order("creado", { ascending: false });
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        name: nombre,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
 }
