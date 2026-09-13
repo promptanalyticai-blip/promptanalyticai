@@ -1,34 +1,37 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearTemplate(nombre: string, contenido: string, userId: string, workspaceId: string) {
-  return supabase.from("templates").insert([
-    { nombre, contenido, user_id: userId, workspace_id: workspaceId }
-  ]);
+export async function crearTemplate(
+  nombre: string,
+  contenido: string,
+  userId: string,
+  workspaceId: string
+) {
+  const supabase = createClient();
+
+  return supabase
+    .from("templates")
+    .insert([
+      {
+        nombre,
+        contenido,
+        user_id: userId,
+        workspace_id: workspaceId,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
 }
 
-export async function cargarTemplates(userId: string, workspaceId: string) {
-  return supabase
+export async function obtenerTemplates(workspaceId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("templates")
     .select("*")
-    .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
-}
+    .eq("workspace_id", workspaceId);
 
-export async function actualizarTemplate(id: string, nombre: string, contenido: string) {
-  return supabase
-    .from("templates")
-    .update({ nombre, contenido })
-    .eq("id", id);
-}
+  if (error) throw error;
 
-export async function eliminarTemplate(id: string) {
-  return supabase.from("templates").delete().eq("id", id);
-}
-
-export async function marcarFavoritoTemplate(id: string) {
-  return supabase.from("templates").update({ favorito: true }).eq("id", id);
-}
-
-export async function quitarFavoritoTemplate(id: string) {
-  return supabase.from("templates").update({ favorito: false }).eq("id", id);
+  return data;
 }
