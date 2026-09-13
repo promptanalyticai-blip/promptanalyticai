@@ -1,22 +1,56 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
-export async function crearTarea(workspaceId: string, creadorId: string, asignadoId: string, titulo: string, descripcion: string, prioridad: string, fecha_limite: string) {
-  return supabase.from("tasks").insert([
-    { workspace_id: workspaceId, creador_id: creadorId, asignado_id: asignadoId, titulo, descripcion, prioridad, fecha_limite }
-  ]);
+export async function crearTask(
+  workspaceId: string,
+  userId: string,
+  titulo: string,
+  descripcion: string
+) {
+  const supabase = createClient();
+
+  return supabase
+    .from("tasks")
+    .insert([
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        titulo,
+        descripcion,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
+    .single();
 }
 
-export async function cargarTareas(workspaceId: string) {
-  return supabase
+export async function obtenerTasks(workspaceId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("tasks")
     .select("*")
     .eq("workspace_id", workspaceId)
-    .order("creado", { ascending: false });
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
 }
 
-export async function actualizarTarea(id: string, estado: string) {
-  return supabase
+export async function completarTask(taskId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("tasks")
-    .update({ estado })
-    .eq("id", id);
+    .update({
+      completado: true,
+      completado_at: new Date().toISOString()
+    })
+    .eq("id", taskId)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
 }
