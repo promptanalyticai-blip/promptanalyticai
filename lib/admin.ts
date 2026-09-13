@@ -1,26 +1,13 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export async function esSuperadmin(userId: string) {
+  const supabase = createClient();
+
   const { data } = await supabase
-    .from("superadmins")
-    .select("*")
+    .from("admins")
+    .select("id")
     .eq("user_id", userId)
     .single();
 
   return !!data;
-}
-
-export async function cargarWorkspaces() {
-  return supabase.from("workspaces").select("*");
-}
-
-export async function cargarUsuarios() {
-  return supabase.from("profiles").select("*");
-}
-
-export async function suspenderUsuario(userId: string) {
-  return supabase
-    .from("profiles")
-    .update({ suspendido: true })
-    .eq("id", userId);
 }
